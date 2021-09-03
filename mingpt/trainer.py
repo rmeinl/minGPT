@@ -31,6 +31,8 @@ class TrainerConfig:
     # checkpoint settings
     ckpt_path = None
     num_workers = 0 # for DataLoader
+    # logger for wandb or others
+    wandb = None
 
     def __init__(self, **kwargs):
         for k,v in kwargs.items():
@@ -109,10 +111,12 @@ class Trainer:
 
                     # report progress
                     pbar.set_description(f"epoch {epoch+1} iter {it}: train loss {loss.item():.5f}. lr {lr:e}")
+                    if config.wandb: config.wandb.log({"train_loss": loss.item(), "lr": lr})
 
             if not is_train:
                 test_loss = float(np.mean(losses))
                 logger.info("test loss: %f", test_loss)
+                if config.wandb: config.wandb.log({"test_loss": test_loss})
                 return test_loss
 
         best_loss = float('inf')
